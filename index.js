@@ -9,9 +9,11 @@ const client = new Client({
     authStrategy: new LocalAuth()
 });
 
+const qrcodeWeb = require('qrcode');
+
 client.on('qr', (qr) => {
-    console.log('ESCANEA ESTE CÓDIGO QR EN LA CONSOLA DE RENDER:');
-    qrcode.generate(qr, {small: true});
+    console.log('--- COPIA ESTE ENLACE EN TU NAVEGADOR PARA VER EL QR ---');
+    console.log(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`);
 });
 
 client.on('ready', () => {
