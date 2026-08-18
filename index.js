@@ -58,13 +58,25 @@ client.on('disconnected', () => {
 
 app.get('/qr', async (req, res) => {
     if (isReady) {
-        return res.send('El bot ya está conectado, no hay QR pendiente.');
+        return res.send('<h2>✅ El bot ya está conectado, no hay QR pendiente.</h2>');
     }
     if (!ultimoQR) {
-        return res.send('Aún no se ha generado el QR. Espera unos segundos y recarga.');
+        return res.send(`
+            <html><head><meta http-equiv="refresh" content="5"></head>
+            <body><h3>Aún no se ha generado el QR. Recargando en 5s...</h3></body></html>
+        `);
     }
     const qrImage = await qrcodeWeb.toDataURL(ultimoQR);
-    res.send(`<img src="${qrImage}" />`);
+    res.send(`
+        <html>
+        <head><meta http-equiv="refresh" content="15"></head>
+        <body style="text-align:center; font-family:sans-serif;">
+            <h3>Escanea este código (se actualiza solo cada 15s)</h3>
+            <img src="${qrImage}" style="width:300px;height:300px;" />
+            <p>Generado: ${new Date().toLocaleTimeString('es-GT', { timeZone: 'America/Guatemala' })}</p>
+        </body>
+        </html>
+    `);
 });
 
 app.get('/estado', (req, res) => {
