@@ -51,9 +51,21 @@ client.on('auth_failure', () => {
     console.log('Fallo de autenticación en WhatsApp.');
 });
 
-client.on('disconnected', () => {
+client.on('disconnected', (reason) => {
     isReady = false;
-    console.log('El bot se ha desconectado.');
+    console.log('El bot se ha desconectado. Razón:', reason);
+});
+
+client.on('change_state', (state) => {
+    console.log('Cambio de estado de conexión:', state);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Promesa rechazada sin manejar:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Excepción no capturada:', err);
 });
 
 app.get('/qr', async (req, res) => {
