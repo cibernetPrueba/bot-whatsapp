@@ -83,6 +83,10 @@ app.get('/estado', (req, res) => {
     res.json({ listo: isReady });
 });
 
+app.get('/', (req, res) => {
+    res.send('Bot activo. Estado: ' + (isReady ? 'Conectado ✅' : 'Desconectado ❌'));
+});
+
 // Ruta automática para enviar mensajes desde tu web con validación
 app.post('/enviar', async (req, res) => {
     if (!isReady) {
