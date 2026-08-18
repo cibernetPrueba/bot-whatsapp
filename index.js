@@ -12,14 +12,33 @@ app.use((req, res, next) => {
 });
 
 const client = new Client({
-    authStrategy: new LocalAuth({ clientId: "mi-bot-personal" })
+    authStrategy: new LocalAuth({ clientId: "mi-bot-personal" }),
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    }
 });
 
 let isReady = false;
 
+let ultimoQR = null;
+
 client.on('qr', (qr) => {
-    console.log('--- COPIA ESTE ENLACE EN TU NAVEGADOR PARA VER EL QR ---');
-    console.log(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`);
+    ultimoQR = qr;
+    console.log('--- NUEVO QR GENERADO. Visita /qr en tu navegador para verlo. ---');
+});
+
+client.on('loading_screen', (percent, message) => {
+    console.log(`Cargando WhatsApp: ${percent}% - ${message}`);
 });
 
 client.on('ready', () => {
@@ -35,6 +54,21 @@ client.on('auth_failure', () => {
 client.on('disconnected', () => {
     isReady = false;
     console.log('El bot se ha desconectado.');
+});
+
+app.get('/qr', async (req, res) => {
+    if (isReady) {
+        return res.send('El bot ya está conectado, no hay QR pendiente.');
+    }
+    if (!ultimoQR) {
+        return res.send('Aún no se ha generado el QR. Espera unos segundos y recarga.');
+    }
+    const qrImage = await qrcodeWeb.toDataURL(ultimoQR);
+    res.send(`<img src="${qrImage}" />`);
+});
+
+app.get('/estado', (req, res) => {
+    res.json({ listo: isReady });
 });
 
 // Ruta automática para enviar mensajes desde tu web con validación
@@ -65,4 +99,4 @@ app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
-client.initialize();
+client.initialize()
