@@ -12,7 +12,7 @@ app.use((req, res, next) => {
 });
 
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth({ clientId: "mi-bot-personal" })
 });
 
 let isReady = false;
